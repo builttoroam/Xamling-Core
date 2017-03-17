@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Portable", "Portable", "{6226BDFB-2DCF-4DD6-9187-4E6F3940BDA0}"
 EndProject
@@ -78,8 +78,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XamlingCore.UWP", "XamlingC
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		XamlingCore.Samples.Windows8\XamlingCore.Samples.Windows8.Shared\XamlingCore.Samples.Windows8.Shared.projitems*{2ddba451-2da1-4461-99d9-a1376422ad1f}*SharedItemsImports = 4
 		XamlingCore.Platform.Shared\XamlingCore.Platform.Shared.projitems*{29bc5772-7e79-455a-bef5-f4a5bfb8198c}*SharedItemsImports = 13
+		XamlingCore.Samples.Windows8\XamlingCore.Samples.Windows8.Shared\XamlingCore.Samples.Windows8.Shared.projitems*{2ddba451-2da1-4461-99d9-a1376422ad1f}*SharedItemsImports = 4
 		XamlingCore.Samples.Windows8\XamlingCore.Samples.Windows8.Shared\XamlingCore.Samples.Windows8.Shared.projitems*{e526af36-f368-402f-af56-a08ed3b4a00f}*SharedItemsImports = 13
 		XamlingCore.Samples.Windows8\XamlingCore.Samples.Windows8.Shared\XamlingCore.Samples.Windows8.Shared.projitems*{f1875b2d-4ea9-4aba-b873-d83e56875076}*SharedItemsImports = 4
 	EndGlobalSection

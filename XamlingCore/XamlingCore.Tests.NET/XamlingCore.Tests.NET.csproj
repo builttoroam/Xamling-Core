@@ -62,7 +62,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\MockMemorySecurityRepo.cs" />
     <Compile Include="Security\SecurityContextTests.cs" />
-    <Compile Include="ThrottleTests\TaskThrottleTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XamlingCore.Portable\XamlingCore.Portable.csproj">

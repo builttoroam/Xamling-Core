@@ -83,19 +83,45 @@ namespace XamlingCore.Portable.Util.TaskUtils
             return t.Task;
         }
 
-        public async Task<bool> Throttle(Func<Task> sourceTask)
+        public Task<bool> Throttle(Func<Task> sourceTask)
         {
-            async Task<bool> func()
+            var t = new TaskCompletionSource<bool>();
+
+            var wait = _semaphore.WaitAsync();
+
+            if (!wait.IsCompleted)
             {
-                await sourceTask();
-                return true;
+                //Debug.WriteLine("TaskThrottler throttled " + _name + " at " + _concurrentItems);
+            }
+            else
+            {
+                t.SetResult(true);
             }
 
-            return await Throttle(func);
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await wait;
+
+                    if (!t.Task.IsCompleted)
+                    {
+                        t.SetResult(true);
+                    }
+
+                    await sourceTask();
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            });
+
+            return t.Task;
         }
 
         private static readonly Dictionary<string, TaskThrottler> Throttles = new Dictionary<string, TaskThrottler>();
-
+        
 
         public static TaskThrottler GetNetwork(int concurrentItems = 10)
         {
@@ -137,7 +163,7 @@ namespace XamlingCore.Portable.Util.TaskUtils
             {
                 _lock.ExitUpgradeableReadLock();
             }
-
+          
         }
 
         private sealed class Releaser : IDisposable

@@ -121,7 +121,13 @@ namespace XamlingCore.Portable.Messages.XamlingMessenger
                     closeItem.Dispose();
                     foreach (var registration in Registrations.Where(r => r.Value.Contains(closeItem)).ToList())
                     {
-                        registration.Value?.Remove(closeItem);
+                        try
+                        {
+                            registration.Value?.Remove(closeItem);
+                        }
+                        catch
+                        {
+                        }
                     }
                 }
             }

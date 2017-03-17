@@ -1,31 +1,22 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>XamlingCore</id>
+    <id>XamlingCore.BTRBuild</id>
 	<title>Xamling Core</title>
-    <version>2.1.151</version>
-    <authors>Jordan</authors>
-    <owners>Jordan</owners>
+    <version>2.1.153</version>
+    <authors>Jordan,btroam</authors>
+    <owners>btroam</owners>
     <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
     <projectUrl>https://github.com/jakkaj/Xamling-Core</projectUrl>
     <iconUrl>http://xamling.net/Media/Images/logo.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Xamling Core for development the Xamling way</description>
-    <releaseNotes>
-	7/5/15 Added progress loader overlay for Windows Universal. 
-	Fixed problem getting device location for Windows Universal. 
-
-	--Older--
-	5/5/15 Added ability to add single entities to buckets. Other entities are cleared out first. 
-	e.g. Can call AddSingleToBucket("userbucket"); then can get back that single user later. 
-	Contact Jordan @jakkaj info@xamling.net. 
-	</releaseNotes>
+    <description>Xamling Core for development the Xamling way. Forked from original repo with modifications.</description>
     <copyright>Copyright 2014</copyright>
     <tags>Xamling XamlingCore MVVM Portable</tags>
     <dependencies>
        <dependency id="Autofac" version="3.5.2" />      
        <dependency id="Microsoft.Net.Http" version="2.2.29" />
-       <dependency id="Newtonsoft.Json" version="7.0.1" />
+       <dependency id="Newtonsoft.Json" version="9.0.1" />
     </dependencies>
   </metadata>
 </package>

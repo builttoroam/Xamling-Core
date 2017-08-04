@@ -1,6 +1,7 @@
-using System;
-using System.Linq;
 using Autofac;
+using System;
+using System.Diagnostics;
+using System.Linq;
 using Xamarin.Forms;
 using XamlingCore.Portable.Contract.Navigation;
 using XamlingCore.Portable.Model.Navigation;
@@ -48,9 +49,9 @@ namespace XamlingCore.XamarinThings.Navigators
             var xNav = _rootNavigationPage as XNavigationPageView;
             if (xNav != null)
             {
-                xNav.BackButtonPressed += XNav_BackButtonPressed;    
+                xNav.BackButtonPressed += XNav_BackButtonPressed;
             }
-            
+
             _xamarinNavigation = _rootNavigationPage.Navigation;
 
             if (_xNavigation.CurrentContentObject != null)
@@ -112,120 +113,141 @@ namespace XamlingCore.XamarinThings.Navigators
 
         async void _navigationModal()
         {
-            var vm = _xNavigation.ModalContentObject as XViewModel;
-
-            if (vm == null)
+            try
             {
-                var mRoot = _xamarinNavigation.ModalStack?.LastOrDefault();
-                
-                if (mRoot != null)
+                var vm = _xNavigation.ModalContentObject as XViewModel;
+
+                if (vm == null)
                 {
-                    var iPopOut = mRoot as XNavigationPageView;
-                    if (iPopOut != null)
+                    var mRoot = _xamarinNavigation.ModalStack?.LastOrDefault();
+
+                    if (mRoot != null)
                     {
-                        await iPopOut.AnimateOut();
+                        var iPopOut = mRoot as XNavigationPageView;
+                        if (iPopOut != null)
+                        {
+                            await iPopOut.AnimateOut();
+                        }
                     }
+                    await _xamarinNavigation.PopModalAsync();
+
+                    return;
                 }
-                await _xamarinNavigation.PopModalAsync();
-                
-                return;
+
+                var rootFrame = XFrame.CreateRootFrame<XRootFrame>(_scope);
+                rootFrame.IsModal = true;
+
+                var frameManager = _scope.Resolve<IFrameManager>();
+
+                vm.ParentModel = rootFrame;
+
+                var rootNavigationVm = rootFrame.CreateContentModel<XNavigationPageViewModel>();
+
+                var initalViewController = frameManager.Init(rootFrame, rootNavigationVm);
+
+
+
+                rootFrame.NavigateTo(vm);
+
+                var i = initalViewController as XNavigationPageView;
+                if (i != null)
+                {
+                    i.PrepForAnimation();
+                }
+
+                await _xamarinNavigation.PushModalAsync(initalViewController, true);
+
+                if (i != null)
+                {
+                    i.AnimateIn();
+                }
             }
-
-            var rootFrame = XFrame.CreateRootFrame<XRootFrame>(_scope);
-            rootFrame.IsModal = true;
-
-            var frameManager = _scope.Resolve<IFrameManager>();
-
-            vm.ParentModel = rootFrame;
-
-            var rootNavigationVm = rootFrame.CreateContentModel<XNavigationPageViewModel>();
-
-            var initalViewController = frameManager.Init(rootFrame, rootNavigationVm);
-
-           
-
-            rootFrame.NavigateTo(vm);
-
-            var i = initalViewController as XNavigationPageView;
-            if (i != null)
+            catch (Exception ex)
             {
-                i.PrepForAnimation();
-            }
-
-            await _xamarinNavigation.PushModalAsync(initalViewController, true);
-
-            if (i != null)
-            {
-                i.AnimateIn();
+                Debug.WriteLine(ex);
             }
         }
 
         async void _navigationForward()
         {
-            var vm = _xNavigation.CurrentContentObject;
-
-            var currentPage = _rootNavigationPage.CurrentPage;
-
-            if (currentPage != null && currentPage.BindingContext != null && currentPage.BindingContext == vm)
+            try
             {
-                //This page is already correct (probably an out of XCore back)
-                return;
+                var vm = _xNavigation.CurrentContentObject;
+
+                var currentPage = _rootNavigationPage.CurrentPage;
+
+                if (currentPage != null && currentPage.BindingContext != null && currentPage.BindingContext == vm)
+                {
+                    //This page is already correct (probably an out of XCore back)
+                    return;
+                }
+
+                var p = _viewResolver.Resolve(vm);
+
+                if (p == null)
+                {
+                    throw new Exception("View type not implemented");
+                }
+
+                await _xamarinNavigation.PushAsync(p);
+
+
+                if (currentPage != null &&
+                    !_xNavigation.NavigationHistory.Contains(currentPage.BindingContext) &&
+                    _xamarinNavigation.NavigationStack.Contains(currentPage)
+                    )
+                {
+                    _xamarinNavigation.RemovePage(currentPage);
+                }
             }
-
-            var p = _viewResolver.Resolve(vm);
-
-            if (p == null)
+            catch (Exception ex)
             {
-                throw new Exception("View type not implemented");
-            }
-
-            await _xamarinNavigation.PushAsync(p);
-
-
-            if (currentPage != null &&
-                !_xNavigation.NavigationHistory.Contains(currentPage.BindingContext) &&
-                _xamarinNavigation.NavigationStack.Contains(currentPage)
-                )
-            {
-                _xamarinNavigation.RemovePage(currentPage);
+                Debug.WriteLine(ex);
             }
         }
 
         async void _navigationBackward()
         {
-            var currentPage = _rootNavigationPage.CurrentPage;
-
-            if (currentPage != null && currentPage.BindingContext != null && currentPage.BindingContext == _rootFrame.CurrentContentObject)
+            try
             {
-                //This page is already correct (probably an out of XCore back)
-                return;
+                var currentPage = _rootNavigationPage.CurrentPage;
+
+                if (currentPage != null && currentPage.BindingContext != null && currentPage.BindingContext == _rootFrame.CurrentContentObject)
+                {
+                    //This page is already correct (probably an out of XCore back)
+                    return;
+                }
+
+                do
+                {
+                    if (_xamarinNavigation.NavigationStack.Count <= 1)
+                    {
+                        break;
+                    }
+
+                    var p = _xamarinNavigation.NavigationStack[_xamarinNavigation.NavigationStack.Count - 2];
+                    var vm = p.BindingContext;
+                    var notCorrectVm = _rootFrame.CurrentContentObject != vm;
+
+                    if (!notCorrectVm)
+                    {
+                        break;
+                    }
+
+                    if (_xamarinNavigation.NavigationStack.Contains(p))
+                    {
+                        _xamarinNavigation.RemovePage(p);
+                    }
+
+
+                } while (true);
+
+                await _xamarinNavigation.PopAsync();
             }
-
-            do
+            catch (Exception ex)
             {
-                if (_xamarinNavigation.NavigationStack.Count <= 1)
-                {
-                    break;
-                }
-
-                var p = _xamarinNavigation.NavigationStack[_xamarinNavigation.NavigationStack.Count - 2];
-                var vm = p.BindingContext;
-                var notCorrectVm = _rootFrame.CurrentContentObject != vm;
-
-                if (!notCorrectVm)
-                {
-                    break;
-                }
-
-                if (_xamarinNavigation.NavigationStack.Contains(p))
-                {
-                    _xamarinNavigation.RemovePage(p);
-                }
-               
-                
-            } while (true);
-            
-            await _xamarinNavigation.PopAsync();
+                Debug.WriteLine(ex);
+            }
         }
 
         private void _setView(NavigationDirection direction)

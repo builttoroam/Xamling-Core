@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Xamarin.Forms;
 using XamlingCore.Portable.Contract.Device;
 using XamlingCore.Portable.Messages.View;
@@ -23,8 +24,15 @@ namespace XamlingCore.XamarinThings.Content.MasterDetail
         }
         protected override void OnSizeAllocated(double width, double height)
         {
-            _orientationSensor.OnRotated();
-            base.OnSizeAllocated(width, height);
+            try
+            {
+                _orientationSensor.OnRotated();
+                base.OnSizeAllocated(width, height);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
         }
 
         void _onEnableSwipe()
